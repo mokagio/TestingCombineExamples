@@ -17,14 +17,15 @@ class TestingCombineExamples: XCTestCase {
 
         let expectation = XCTestExpectation(description: "Receives one value")
 
-        publisher.sink(
-            receiveCompletion: { _ in },
-            receiveValue: {
-                XCTAssertEqual($0, 1)
-                expectation.fulfill()
-            }
-        )
-        .store(in: &cancellables)
+        publisher
+            .sink(
+                receiveCompletion: { _ in },
+                receiveValue: {
+                    XCTAssertEqual($0, 1)
+                    expectation.fulfill()
+                }
+            )
+            .store(in: &cancellables)
 
         wait(for: [expectation], timeout: 0.5)
     }
@@ -40,16 +41,17 @@ class TestingCombineExamples: XCTestCase {
 
         let expectation = XCTestExpectation(description: "Receives one value")
 
-        publisher.sink(
-            receiveCompletion: { completion in
-                guard case .finished = completion else { return }
-                expectation.fulfill()
-            },
-            receiveValue: {
-                XCTAssertEqual($0, 1)
-            }
-        )
-        .store(in: &cancellables)
+        publisher
+            .sink(
+                receiveCompletion: { completion in
+                    guard case .finished = completion else { return }
+                    expectation.fulfill()
+                },
+                receiveValue: {
+                    XCTAssertEqual($0, 1)
+                }
+            )
+            .store(in: &cancellables)
 
         wait(for: [expectation], timeout: 0.5)
     }
@@ -69,16 +71,17 @@ class TestingCombineExamples: XCTestCase {
 
         var values: [Int] = []
 
-        publisher.sink(
-            receiveCompletion: { completion in
-                guard case .finished = completion else { return }
-                expectation.fulfill()
-            },
-            receiveValue: {
-                values.append($0)
-            }
-        )
-        .store(in: &cancellables)
+        publisher
+            .sink(
+                receiveCompletion: { completion in
+                    guard case .finished = completion else { return }
+                    expectation.fulfill()
+                },
+                receiveValue: {
+                    values.append($0)
+                }
+            )
+            .store(in: &cancellables)
 
         wait(for: [expectation], timeout: 0.5)
 
@@ -189,19 +192,20 @@ class TestingCombineExamples: XCTestCase {
 
         var values: [Result<Int, TestError>] = []
 
-        publisher.sink(
-            receiveCompletion: { completion in
-                switch completion {
-                case .failure(let error): values.append(.failure(error))
-                case .finished: break
+        publisher
+            .sink(
+                receiveCompletion: { completion in
+                    switch completion {
+                    case .failure(let error): values.append(.failure(error))
+                    case .finished: break
+                    }
+                    expectation.fulfill()
+                },
+                receiveValue: {
+                    values.append(.success($0))
                 }
-                expectation.fulfill()
-            },
-            receiveValue: {
-                values.append(.success($0))
-            }
-        )
-        .store(in: &cancellables)
+            )
+            .store(in: &cancellables)
 
         wait(for: [expectation], timeout: 0.5)
 
