@@ -5,7 +5,7 @@ class TestingCombineExamples: XCTestCase {
 
     private var cancellables = Set<AnyCancellable>()
 
-    func testFirstReceivedValue() throws {
+    func testFirstPublishedValue() throws {
         let subject = PassthroughSubject<Int, TestError>()
         asyncAfter(0.1) {
             subject.send(1)
@@ -15,7 +15,7 @@ class TestingCombineExamples: XCTestCase {
 
         let publisher = subject.eraseToAnyPublisher()
 
-        let expectation = XCTestExpectation(description: "Receives one value")
+        let expectation = XCTestExpectation(description: "First published value is <# value #>")
 
         publisher
             .sink(
@@ -30,7 +30,7 @@ class TestingCombineExamples: XCTestCase {
         wait(for: [expectation], timeout: 0.5)
     }
 
-    func testReceivesOnlyOneValue() throws {
+    func testPublishesOnlyOneValue() throws {
         let subject = PassthroughSubject<Int, TestError>()
         asyncAfter(0.1) {
             subject.send(1)
@@ -39,7 +39,7 @@ class TestingCombineExamples: XCTestCase {
 
         let publisher = subject.eraseToAnyPublisher()
 
-        let expectation = XCTestExpectation(description: "Receives one value")
+        let expectation = XCTestExpectation(description: "Publishes only once with value <# value #>")
 
         publisher
             .sink(
@@ -56,7 +56,7 @@ class TestingCombineExamples: XCTestCase {
         wait(for: [expectation], timeout: 0.5)
     }
 
-    func testReceivesManyValues() throws {
+    func testPublishesManyValues() throws {
         let subject = PassthroughSubject<Int, TestError>()
         asyncAfter(0.1) {
             subject.send(1)
@@ -67,7 +67,7 @@ class TestingCombineExamples: XCTestCase {
 
         let publisher = subject.eraseToAnyPublisher()
 
-        let expectation = XCTestExpectation(description: "Receives values in order")
+        let expectation = XCTestExpectation(description: "Publishes many values")
 
         var values: [Int] = []
 
@@ -88,7 +88,7 @@ class TestingCombineExamples: XCTestCase {
         XCTAssertEqual([1,2,3], values)
     }
 
-    func testEventuallyReceivesError() throws {
+    func testEventuallyPublishesAFailure() throws {
         let subject = PassthroughSubject<Int, TestError>()
         asyncAfter(0.1) {
             subject.send(1)
@@ -99,7 +99,7 @@ class TestingCombineExamples: XCTestCase {
 
         let publisher = subject.eraseToAnyPublisher()
 
-        let expectation = XCTestExpectation(description: "Receives an error")
+        let expectation = XCTestExpectation(description: "Eventually publishes a failure")
 
         publisher
             .sink(
@@ -115,7 +115,7 @@ class TestingCombineExamples: XCTestCase {
         wait(for: [expectation], timeout: 0.5)
     }
 
-    func testOnlyReceivesError() throws {
+    func testPublishesOnlyFailure() {
         let subject = PassthroughSubject<Int, TestError>()
         asyncAfter(0.1) {
             subject.send(completion: .failure(.errorCase1))
@@ -123,7 +123,7 @@ class TestingCombineExamples: XCTestCase {
 
         let publisher = subject.eraseToAnyPublisher()
 
-        let expectation = XCTestExpectation(description: "Receives an error")
+        let expectation = XCTestExpectation(description: "Fails without publishing values")
 
         publisher
             .sink(
@@ -142,7 +142,8 @@ class TestingCombineExamples: XCTestCase {
     }
 
 
-    func testReceivesSomeValuesThenFails() throws {
+    // Similar to the previous one, but now we're interested in the published values, too.
+    func testPublishesSomeValuesThenFails() throws {
         let subject = PassthroughSubject<Int, TestError>()
         asyncAfter(0.1) {
             subject.send(1)
@@ -153,7 +154,7 @@ class TestingCombineExamples: XCTestCase {
 
         let publisher = subject.eraseToAnyPublisher()
 
-        let expectation = XCTestExpectation(description: "Receives values in order")
+        let expectation = XCTestExpectation(description: "Publishes values then a failure")
 
         var values: [Int] = []
 
@@ -177,7 +178,7 @@ class TestingCombineExamples: XCTestCase {
     // The difference here is that we use an array of `Result` to collect all the values and then
     // run an equality assertion on that. It only works if both `Output` and `Failure` conform to
     // `Equatable`
-    func testReceivesSomeValuesThenFails_Alternative() throws {
+    func testPublishesSomeValuesThenFails_Alternative() throws {
         let subject = PassthroughSubject<Int, TestError>()
         asyncAfter(0.1) {
             subject.send(1)
@@ -188,7 +189,7 @@ class TestingCombineExamples: XCTestCase {
 
         let publisher = subject.eraseToAnyPublisher()
 
-        let expectation = XCTestExpectation(description: "Receives values in order")
+        let expectation = XCTestExpectation(description: "Publishes values then a failure")
 
         var values: [Result<Int, TestError>] = []
 
