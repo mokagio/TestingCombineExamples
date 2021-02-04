@@ -179,8 +179,3 @@ class TestingCombineExamples: XCTestCase {
         XCTAssertEqual(expectedValues, values)
     }
 }
-
-enum TestError: Equatable, Error {
-    case errorCase1
-    case errorCase2
-}
