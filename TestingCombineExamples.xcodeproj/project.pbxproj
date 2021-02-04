@@ -11,6 +11,7 @@
 		3FA8B51B25CC78B9004E818C /* TestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA8B51A25CC78B9004E818C /* TestError.swift */; };
 		3FA8B51E25CC7AB8004E818C /* XCTestCase+CombineAssertions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA8B51D25CC7AB8004E818C /* XCTestCase+CombineAssertions.swift */; };
 		3FA8B52725CC7DA0004E818C /* DispatchQueue+SyntaxSugar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA8B52625CC7DA0004E818C /* DispatchQueue+SyntaxSugar.swift */; };
+		3FA8B52225CC7B26004E818C /* ExamplesWithCustomAssertions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA8B52125CC7B26004E818C /* ExamplesWithCustomAssertions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +21,7 @@
 		3FA8B51A25CC78B9004E818C /* TestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestError.swift; sourceTree = "<group>"; };
 		3FA8B51D25CC7AB8004E818C /* XCTestCase+CombineAssertions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+CombineAssertions.swift"; sourceTree = "<group>"; };
 		3FA8B52625CC7DA0004E818C /* DispatchQueue+SyntaxSugar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+SyntaxSugar.swift"; sourceTree = "<group>"; };
+		3FA8B52125CC7B26004E818C /* ExamplesWithCustomAssertions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamplesWithCustomAssertions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,8 +55,9 @@
 			isa = PBXGroup;
 			children = (
 				3FA8B52625CC7DA0004E818C /* DispatchQueue+SyntaxSugar.swift */,
-				3FA8B51325CC71F8004E818C /* TestingCombineExamples.swift */,
+				3FA8B52125CC7B26004E818C /* ExamplesWithCustomAssertions.swift */,
 				3FA8B51A25CC78B9004E818C /* TestError.swift */,
+				3FA8B51325CC71F8004E818C /* TestingCombineExamples.swift */,
 				3FA8B51D25CC7AB8004E818C /* XCTestCase+CombineAssertions.swift */,
 				3FA8B51525CC71F8004E818C /* Info.plist */,
 			);
@@ -131,6 +134,7 @@
 				3FA8B52725CC7DA0004E818C /* DispatchQueue+SyntaxSugar.swift in Sources */,
 				3FA8B51B25CC78B9004E818C /* TestError.swift in Sources */,
 				3FA8B51E25CC7AB8004E818C /* XCTestCase+CombineAssertions.swift in Sources */,
+				3FA8B52225CC7B26004E818C /* ExamplesWithCustomAssertions.swift in Sources */,
 				3FA8B51425CC71F8004E818C /* TestingCombineExamples.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
