@@ -3,6 +3,18 @@ import XCTest
 
 class TestingCombineExamplesWithCustomAssertions: XCTestCase {
 
+    func testReceivesOnlyOneValue() throws {
+        let subject = PassthroughSubject<Int, TestError>()
+        asyncAfter(0.1) {
+            subject.send(1)
+            subject.send(completion: .finished)
+        }
+
+        let publisher = subject.eraseToAnyPublisher()
+
+        assert(publisher, eventuallyPublishesOnly: 1)
+    }
+
     func testReceivesSomeValuesThenFails() throws {
         let subject = PassthroughSubject<Int, TestError>()
         asyncAfter(0.1) {
