@@ -56,6 +56,35 @@ class TestingCombineExamples: XCTestCase {
         wait(for: [expectation], timeout: 0.5)
     }
 
+    func testPublishesOnlyOneValueThenFails() throws {
+        let subject = PassthroughSubject<Int, TestError>()
+        asyncAfter(0.1) {
+            subject.send(1)
+            subject.send(completion: .failure(.errorCase1))
+        }
+
+        let publisher = subject.eraseToAnyPublisher()
+
+        let expectation = XCTestExpectation(
+            description: "Publishes only once with value <# value #> then fails with <# error #>"
+        )
+
+        publisher
+            .sink(
+                receiveCompletion: { completion in
+                    guard case .failure(let error) = completion else { return }
+                    XCTAssertEqual(error, .errorCase1)
+                    expectation.fulfill()
+                },
+                receiveValue: {
+                    XCTAssertEqual($0, 1)
+                }
+            )
+            .store(in: &cancellables)
+
+        wait(for: [expectation], timeout: 0.5)
+    }
+
     func testPublishesManyValues() throws {
         let subject = PassthroughSubject<Int, TestError>()
         asyncAfter(0.1) {
@@ -129,11 +158,11 @@ class TestingCombineExamples: XCTestCase {
             .sink(
                 receiveCompletion: { completion in
                     guard case .failure(let error) = completion else { return }
-                    XCTAssertEqual(.errorCase1, error)
+                    XCTAssertEqual(error, .errorCase1)
                     expectation.fulfill()
                 },
                 receiveValue: {
-                    XCTFail("Expected to only receive error, got \($0)")
+                    XCTFail("Expected to fail without receiving any value, got \($0)")
                 }
             )
             .store(in: &cancellables)
