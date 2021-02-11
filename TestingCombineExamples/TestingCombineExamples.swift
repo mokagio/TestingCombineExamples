@@ -5,15 +5,119 @@ class TestingCombineExamples: XCTestCase {
 
     private var cancellables = Set<AnyCancellable>()
 
-    func testPublishesOnlyFailure() {
+    // MARK: - Examples from the blogpost
+
+    func testPublishesExactlyOneValueThenFinishes() throws {
         let subject = PassthroughSubject<Int, TestError>()
         asyncAfter(0.1) {
+            subject.send(1)
+            subject.send(completion: .finished)
+        }
+
+        let publisher = subject.eraseToAnyPublisher()
+
+        let expectation = XCTestExpectation(description: "Publishes one value then finishes")
+
+        var values: [Int] = []
+
+        publisher
+            .sink(
+                receiveCompletion: { completion in
+                    guard case .finished = completion else { return }
+                    expectation.fulfill()
+                },
+                receiveValue: { value in
+                    guard values.isEmpty else {
+                        return XCTFail("Expected to receive only one value, got another: (\(value))")
+                    }
+                    XCTAssertEqual(value, 1)
+                    values.append(value)
+                }
+            )
+            .store(in: &cancellables)
+
+        wait(for: [expectation], timeout: 0.5)
+    }
+
+    func testPublishesExactlyOneValueThenFails() throws {
+        let subject = PassthroughSubject<Int, TestError>()
+        asyncAfter(0.1) {
+            subject.send(1)
             subject.send(completion: .failure(.errorCase1))
         }
 
         let publisher = subject.eraseToAnyPublisher()
 
-        let expectation = XCTestExpectation(description: "Fails without publishing values")
+        let expectation = XCTestExpectation(description: "Publishes one value then fails")
+
+        var values: [Int] = []
+
+        publisher
+            .sink(
+                receiveCompletion: { completion in
+                    guard case .failure(let error) = completion else { return }
+                    XCTAssertEqual(error, .errorCase1)
+                    expectation.fulfill()
+                },
+                receiveValue: { value in
+                    guard values.isEmpty else {
+                        return XCTFail("Expected to receive only one value, got another (\(value))")
+                    }
+                    XCTAssertEqual(value, 1)
+                    values.append(value)
+                }
+            )
+            .store(in: &cancellables)
+
+        wait(for: [expectation], timeout: 0.5)
+    }
+
+    func testPublishesManyValuesThenFinishes() throws {
+        let subject = PassthroughSubject<Int, TestError>()
+        asyncAfter(0.1) {
+            subject.send(1)
+            subject.send(2)
+            subject.send(3)
+            subject.send(completion: .finished)
+        }
+
+        let publisher = subject.eraseToAnyPublisher()
+
+        let expectation = XCTestExpectation(description: "Publishes values then finishes")
+
+        var values: [Int] = []
+
+        publisher
+            .sink(
+                receiveCompletion: { completion in
+                    guard case .finished = completion else { return }
+                    expectation.fulfill()
+                },
+                receiveValue: {
+                    values.append($0)
+                }
+            )
+            .store(in: &cancellables)
+
+        wait(for: [expectation], timeout: 0.5)
+
+        XCTAssertEqual([1,2,3], values)
+    }
+
+    func testPublishesManyValuesThenAFailure() throws {
+        let subject = PassthroughSubject<Int, TestError>()
+        asyncAfter(0.1) {
+            subject.send(1)
+            subject.send(2)
+            subject.send(3)
+            subject.send(completion: .failure(.errorCase1))
+        }
+
+        let publisher = subject.eraseToAnyPublisher()
+
+        let expectation = XCTestExpectation(description: "Publishes many values then a failure")
+
+        var values: [Int] = []
 
         publisher
             .sink(
@@ -23,12 +127,14 @@ class TestingCombineExamples: XCTestCase {
                     expectation.fulfill()
                 },
                 receiveValue: {
-                    XCTFail("Expected to fail without receiving any value, got \($0)")
+                    values.append($0)
                 }
             )
             .store(in: &cancellables)
 
         wait(for: [expectation], timeout: 0.5)
+
+        XCTAssertEqual(values, [1, 2, 3])
     }
 
     func testFinishesWithoutPublishingValues() {
@@ -55,6 +161,34 @@ class TestingCombineExamples: XCTestCase {
 
         wait(for: [expectation], timeout: 0.5)
     }
+
+    func testPublishesOnlyAFailure() {
+        let subject = PassthroughSubject<Int, TestError>()
+        asyncAfter(0.1) {
+            subject.send(completion: .failure(.errorCase1))
+        }
+
+        let publisher = subject.eraseToAnyPublisher()
+
+        let expectation = XCTestExpectation(description: "Fails without publishing values")
+
+        publisher
+            .sink(
+                receiveCompletion: { completion in
+                    guard case .failure(let error) = completion else { return }
+                    XCTAssertEqual(error, .errorCase1)
+                    expectation.fulfill()
+                },
+                receiveValue: {
+                    XCTFail("Expected to fail without receiving any value, got \($0)")
+                }
+            )
+            .store(in: &cancellables)
+
+        wait(for: [expectation], timeout: 0.5)
+    }
+
+    // MARK: - More examples
 
     func testCompletesWithoutPublishingValues() {
         let subject = PassthroughSubject<Int, TestError>()
@@ -108,39 +242,6 @@ class TestingCombineExamples: XCTestCase {
                     }
                     XCTAssertEqual(value, 1)
                     receivedValue = value
-                }
-            )
-            .store(in: &cancellables)
-
-        wait(for: [expectation], timeout: 0.5)
-    }
-
-    func testPublishesAtLeastOneValueThenFinishes() throws {
-        let subject = PassthroughSubject<Int, TestError>()
-        asyncAfter(0.1) {
-            subject.send(1)
-            subject.send(completion: .finished)
-        }
-
-        let publisher = subject.eraseToAnyPublisher()
-        var values: [Int] = []
-
-        let expectation = XCTestExpectation(
-            description: "Publishes once with value <# value #> then finishes"
-        )
-
-        publisher
-            .sink(
-                receiveCompletion: { completion in
-                    guard case .finished = completion else { return }
-                    expectation.fulfill()
-                },
-                receiveValue: { value in
-                    guard values.isEmpty else {
-                        return XCTFail("Expected to receive only one value, got another (\(value))")
-                    }
-                    XCTAssertEqual(value, 1)
-                    values.append(value)
                 }
             )
             .store(in: &cancellables)
@@ -231,38 +332,6 @@ class TestingCombineExamples: XCTestCase {
             .store(in: &cancellables)
 
         wait(for: [expectation], timeout: 0.5)
-    }
-
-    func testPublishesManyValues() throws {
-        let subject = PassthroughSubject<Int, TestError>()
-        asyncAfter(0.1) {
-            subject.send(1)
-            subject.send(2)
-            subject.send(3)
-            subject.send(completion: .finished)
-        }
-
-        let publisher = subject.eraseToAnyPublisher()
-
-        let expectation = XCTestExpectation(description: "Publishes many values")
-
-        var values: [Int] = []
-
-        publisher
-            .sink(
-                receiveCompletion: { completion in
-                    guard case .finished = completion else { return }
-                    expectation.fulfill()
-                },
-                receiveValue: {
-                    values.append($0)
-                }
-            )
-            .store(in: &cancellables)
-
-        wait(for: [expectation], timeout: 0.5)
-
-        XCTAssertEqual([1,2,3], values)
     }
 
     func testEventuallyPublishesAFailure() throws {
